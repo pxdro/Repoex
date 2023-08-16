@@ -1,0 +1,114 @@
+﻿@typeparam Classe
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+<button class="btn btn-primary" @onclick="GerarExcel" disabled="@Disabled">Exportar para Excel</button>
+
+@code {
+    [Parameter]
+    public List<Classe> Dados { get; set; } = new List<Classe>();
+
+    private int Coluna = 1;
+    private int Linha = 1;
+    private bool Disabled = false;
+
+    private async Task GerarExcel()
+    {
+        // Desabilita o botão
+        Disabled = true;
+
+        // Cria uma nova instância do ExcelPackage
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Para uso não comercial
+        ExcelPackage excelPackage = new ExcelPackage();
+
+        // Cria uma nova planilha
+        ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Dados");
+
+        // Insere os títulos das colunas
+        await InsereCabecalho(worksheet);
+
+        // Insere os dados
+        await InsereDados(worksheet);
+
+        // Salva o arquivo
+        MemoryStream stream = new MemoryStream();
+        excelPackage.SaveAs(stream);
+
+        // Envia o arquivo para o cliente
+        byte[] content = stream.ToArray();
+        await DownloadExcel(content);
+
+        // Habilita o botão
+        Disabled = false;
+    }
+
+    private async Task InsereCabecalho(ExcelWorksheet worksheet)
+    {
+        await Task.Run(() =>
+        {
+            // Loop nas propriedades da classe para insercao dos titulos
+            Coluna = 1;
+            foreach (var propriedade in typeof(Classe).GetProperties())
+            {
+                if (Coluna > 27)
+                    worksheet.Cells[$"{ObterColuna(Coluna)}{Linha}"].Value = propriedade.Name;
+
+                worksheet.Cells[$"{ObterColuna(Coluna)}{Linha}"].Value = propriedade.Name;
+                Coluna++;
+            }
+        });
+    }
+
+    private async Task InsereDados(ExcelWorksheet worksheet)
+    {
+        await Task.Run(() =>
+        {
+            // Loop nas propriedades e nos conteúdos da classe para insercao dos valores
+            Linha = 2;
+            foreach (var dado in Dados)
+            {
+                Coluna = 1;
+                foreach (var propriedade in typeof(Classe).GetProperties())
+                {
+                    worksheet.Cells[$"{ObterColuna(Coluna)}{Linha}"].Value = propriedade.GetValue(dado)?.ToString()?.Replace("\n"," ");
+                    Coluna++;
+                }
+                Linha++;
+            }
+        });
+    }
+
+    private async Task DownloadExcel(byte[] content)
+    {
+        // Converte o conteúdo em base64
+        string base64 = Convert.ToBase64String(content);
+
+        // Define a URL para o download
+        string url = $"data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64}";
+
+        // Cria o elemento <a>
+        await JsRuntime.InvokeVoidAsync("eval", $"var link = document.createElement('a'); link.href = '{url}'; link.download = '{typeof(Classe).Name}.xlsx'; document.body.appendChild(link);");
+
+        // Simula um clique no elemento <a>
+        await JsRuntime.InvokeVoidAsync("eval", $"link.click();");
+
+        // Remove o elemento <a> do DOM
+        await JsRuntime.InvokeVoidAsync("eval", $"document.body.removeChild(link);");
+    }
+
+    private static string ObterColuna(int numeroColuna)
+    {
+        int dividendo = numeroColuna;
+        string nomeColuna = String.Empty;
+        int modulo;
+
+        while (dividendo > 0)
+        {
+            modulo = (dividendo - 1) % 26;
+            nomeColuna = Convert.ToChar(65 + modulo).ToString() + nomeColuna;
+            dividendo = (int)((dividendo - modulo) / 26);
+        }
+
+        return nomeColuna;
+    }
+}

@@ -1,0 +1,111 @@
+﻿<h5>Meus Relatórios</h5>
+
+<nav class="nav">
+    <AuthorizeView Roles="Acesso">             
+        <NavLink class="nav-link m-2 p-0" href="acessos">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-key"></span>
+                </div>
+                <div>
+                    <span class="texto">Acessos</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+     <AuthorizeView Roles="Cotacao">             
+        <NavLink class="nav-link m-2 p-0" href="cotacoes">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-dollar"></span>
+                </div>
+                <div>
+                    <span class="texto">Cotações</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+     <AuthorizeView Roles="PedidoEngenharia">             
+        <NavLink class="nav-link m-2 p-0" href="pedidosengenharia">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-wrench"></span>
+                </div>
+                <div>
+                    <span class="texto">Pedido Engenharia</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+     <AuthorizeView Roles="Transporte">             
+        <NavLink class="nav-link m-2 p-0" href="transportes">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-map-marker"></span>
+                </div>
+                <div>
+                    <span class="texto">Transportes</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+     <AuthorizeView Roles="ViagensCentroTreinamento">             
+        <NavLink class="nav-link m-2 p-0" href="viagenscentrotreinamento">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-globe"></span>
+                </div>
+                <div>
+                    <span class="texto">Viagens Centro Treinamento</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Decolideia">
+        <NavLink class="nav-link m-2 p-0" href="decolideias">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-lightbulb"></span>
+                </div>
+                <div>
+                    <span class="texto">Decolideia</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Exportacao">
+        <NavLink class="nav-link m-2 p-0" href="exportacoes">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-compass"></span>
+                </div>
+                <div>
+                    <span class="texto">Exportações</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="HoraExtra">
+        <NavLink class="nav-link m-2 p-0" href="horasextras">
+            <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-book"></span>
+                </div>
+                <div>
+                    <span class="texto">Horas Extras</span>
+                </div>
+            </button>
+        </NavLink>
+    </AuthorizeView>
+</nav>
+
+@code {
+    
+}

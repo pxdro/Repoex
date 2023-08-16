@@ -1,0 +1,31 @@
+﻿@page "/pedidosengenharia"
+@inject IPedidoEngenhariaService PedidoEngenhariaService
+@attribute [Authorize(Roles = "PedidoEngenharia")]
+
+<PageTitle>Pedido Engenharia</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Pedido Engenharia</h3>
+    @if (pedidosEngenharia != null)
+    {
+        <div class="col-auto"><ExportData Classe="PedidoEngenharia" Dados="@pedidosEngenharia"/></div>
+    }
+</div>
+
+@if (pedidosEngenharia == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <PaginatedTable Classe="PedidoEngenharia" Dados="@pedidosEngenharia" LinhasPorPagina="20"/>  
+}
+
+@code {
+    private List<PedidoEngenharia>? pedidosEngenharia;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pedidosEngenharia = await PedidoEngenhariaService.ObterPedidosEngenharia();
+    }
+}

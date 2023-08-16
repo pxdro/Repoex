@@ -1,0 +1,33 @@
+﻿@page "/viagenscentrotreinamento"
+@inject IViagensCentroTreinamentoService ViagensCentroTreinamentoService
+@attribute [Authorize(Roles = "ViagensCentroTreinamento")]
+
+<PageTitle>Viagens Centro Treinamento</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Viagens Centro Treinamento</h3>
+    <!--
+    @if (viagensCentroTreinamento != null)
+    {
+        <div class="col-auto"><ExportData Classe="Transporte" Dados="@transportes"/></div>
+    }
+    -->
+</div>
+
+@if (viagensCentroTreinamento == null)
+{
+        <p><em>Carregando...</em></p>
+}
+else
+{
+            <PaginatedTable Classe="ViagensCentroTreinamento" Dados="@viagensCentroTreinamento" LinhasPorPagina="20"/>    
+}
+
+@code {
+    private List<ViagensCentroTreinamento>? viagensCentroTreinamento;
+
+    protected override async Task OnInitializedAsync()
+    {
+        viagensCentroTreinamento = await ViagensCentroTreinamentoService.ObterViagensCentroTreinamento();
+    }
+}

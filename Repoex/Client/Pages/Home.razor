@@ -1,0 +1,25 @@
+﻿@page "/"
+
+<PageTitle>RepoEx</PageTitle>
+
+<img class="repoex-logo m-0 p-0" src="/LOGO_REPOEX.png" alt="logo"/>
+
+<hr class="my-4">
+
+<AuthorizeView>
+    <Authorized>
+        <div>
+            <ReportsMenu/>
+        </div>
+        <div class="my-4">
+            <AdminMenu/>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="text-danger mt-3 fs-22px">Atenção</div>
+        <div class="fs-18px">Por favor realizar Login na plataforma clicando no botão localizado no canto superior direito da tela.</div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+<SurveyPrompt/>

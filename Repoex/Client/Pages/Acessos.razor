@@ -1,0 +1,33 @@
+﻿@page "/acessos"
+@inject IAcessoService AcessoService
+@attribute [Authorize(Roles = "Acesso")]
+
+<PageTitle>Acessos</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Acessos</h3>
+    <!--
+    @if (acessos != null)
+    {
+        <div class="col-auto"><ExportData Classe="Acesso" Dados="@acessos"/></div>
+    }
+    -->
+</div>
+
+@if (acessos == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <PaginatedTable Classe="Acesso" Dados="@acessos" LinhasPorPagina="20"/>    
+}
+
+@code {
+    private List<Acesso>? acessos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        acessos = await AcessoService.ObterAcessos();
+    }
+}

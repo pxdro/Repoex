@@ -1,0 +1,62 @@
+﻿@page "/permissoes"
+@inject IPermissaoService PermissaoService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Permissões</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Permissões</h3>
+    <div class="col-auto">
+        <button class="btn btn-primary" type="button" @onclick="Criar">Nova Permissão</button>
+    </div>
+</div>
+
+<div class="table-responsive mb-2">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Relatório</th>
+            </tr>
+        </thead>
+
+        @if (permissoes == null)
+        {
+            <tr class="text-center mx-auto">
+                Carregando...
+            </tr>
+        }
+        else
+        {
+            <tbody>
+            @foreach (var permissao in permissoes)
+            {
+                    <tr>
+                        <td>@permissao.Id</td>
+                        <td>@permissao.Relatorio</td>
+                    </tr>
+            }
+            </tbody>
+        }    
+    </table>
+</div>
+
+@code {
+    private List<PermissaoVM>? permissoes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        permissoes = await PermissaoService.ObterTodos();
+    }
+
+    void Criar()
+    {
+        NavigationManager.NavigateTo($"permissaoform");
+    }
+
+    void Editar(Guid id)
+    {
+        NavigationManager.NavigateTo($"permissaoform/{id}");
+    }
+}

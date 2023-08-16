@@ -1,0 +1,94 @@
+﻿@page "/usuarios"
+@inject IUsuarioService UsuarioService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Usuários</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Usuários</h3>
+    <div class="col-auto">
+        <button class="btn btn-primary" type="button" @onclick="Criar">Novo Usuário</button>
+    </div>
+</div>
+
+<div class="table-responsive mb-2">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nome</th>
+                <th>Login</th>
+                <th>Admin</th>
+                <th>Permissões</th>
+                <th>Status</th>
+                <th>Gerenciar</th>
+            </tr>
+        </thead>
+    
+        @if (usuarios == null){
+            <tr class="text-center mx-auto">
+                Carregando...
+            </tr>
+        }
+        else{
+            <tbody>
+            @foreach (var usuario in usuarios)
+            {
+                <tr>
+                    <td>@usuario.Id</td>
+                    <td>@usuario.Nome</td>
+                    <td>@usuario.Login</td>
+                    <td>@usuario.Admin</td>
+                    <td>
+                        @if (usuario.Permissoes == null)
+                        {
+                            <span>-</span>
+                        }
+                        else{
+                            @foreach (var permissao in usuario.Permissoes){
+                                <div>@permissao.Relatorio</div>
+                            }
+                        }
+                    </td>                    
+                    <td>@usuario.Status</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="(() => Editar(usuario.Id))"> <i class="oi oi-pencil"></i></button>
+                        <button class="btn btn-danger btn-sm" @onclick="(() => Remover(usuario.Id, usuario.Nome))"> <i class="oi oi-x"></i></button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        }    
+    </table>
+</div>
+
+@code {
+    private List<UsuarioVM>? usuarios;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await UsuarioService.ObterTodos();
+    }
+
+    void Criar()
+    {
+        NavigationManager.NavigateTo($"usuarioform");
+    }
+
+    void Editar(Guid id)
+    {
+        NavigationManager.NavigateTo($"usuarioform/{id}");
+    }
+
+    async void Remover(Guid id, string nome)
+    {
+        if (await JsRuntime.InvokeAsync<bool>("confirm", $"Tem certeza que deseja remover o usuário {nome}?") == true)
+        {
+            await UsuarioService.Remover(id);
+            NavigationManager.NavigateTo("usuarios", true);
+        }
+    }
+
+}

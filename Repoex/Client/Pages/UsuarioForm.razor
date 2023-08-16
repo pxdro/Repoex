@@ -1,0 +1,196 @@
+﻿@page "/usuarioform"
+@page "/usuarioform/{id:guid}"
+@inject IUsuarioService UsuarioService
+@inject IPermissaoService PermissaoService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+
+@if (Id == Guid.Empty)
+{
+    <PageTitle>Criar usuário</PageTitle>
+    <h3>Criar usuário</h3>
+}
+else
+{
+    <PageTitle>Editar usuário</PageTitle>
+    <h3>Editar usuário</h3>
+}
+
+ <EditForm Model="usuario" OnValidSubmit="@Enviar">
+    <DataAnnotationsValidator/>
+
+    <div class="row align-items-start">
+        <div class="form-group col-auto col-md-3">
+            <label for="nome">Nome</label>
+            <InputText id="nome" @bind-Value="@usuario.Nome" class="form-control"></InputText>
+            <ValidationMessage For="@(() => usuario.Nome)"/>
+        </div>
+
+        <div class="form-group col-auto col-md-3">
+            <label for="login">Login</label>
+            <InputText id="login" @bind-Value="usuario.Login" class="form-control"></InputText>
+            <ValidationMessage For="@(() => usuario.Login)"/>
+        </div>
+    </div>
+
+    <div class="row my-2">
+        <div class="form-group col-auto col-md-2">
+            <label for="status">Status</label><br />
+            <InputRadioGroup id="status" @bind-Value="usuario.Status" class="form-control">
+            @foreach (var enumStatus in Enum.GetValues(typeof(EnumStatus)))
+            {
+                <InputRadio Value="@enumStatus"></InputRadio>
+                <span class="ps-1">@enumStatus</span>
+                <br/>
+            }                
+            </InputRadioGroup>
+        </div>
+
+        <div class="form-group col-auto col-md-2">
+            <label for="admin">Nivel</label><br />
+            <InputSelect id="admin" @bind-Value="usuario.Admin">
+                <option value="@EnumStatus.Inativo">Basico</option>
+                <option value="@EnumStatus.Ativo">Admin</option>
+            </InputSelect>
+        </div>
+
+        <div class="col-auto col-md-2">
+            <label>Permissões</label>
+            @foreach (var gerenciaPermissao in gerenciaPermissoes)
+            {
+                <div class="form-check">
+                    <InputCheckbox id="@gerenciaPermissao.Relatorio" @bind-Value="gerenciaPermissao.Include" class="form-check-input"></InputCheckbox>
+                    <label for="@gerenciaPermissao.Relatorio" class="form-check-label">@gerenciaPermissao.Relatorio</label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="justify-content-center col-auto col-md-6 ">
+        <button type="submit" disabled="@disabled" class="btn btn-primary">@btnText</button>
+        <button class="btn btn-danger" @onclick="(() => Cancelar())">Cancelar</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(msgError))
+    {
+        <div class="justify-content-center col-auto col-md-6 text-danger mt-3">
+            <span>@msgError</span>
+        </div>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Guid.Empty;
+
+    UsuarioVM usuario = new UsuarioVM();
+    List<PermissaoVM> permissoes = new List<PermissaoVM>();
+    string btnText = string.Empty;
+    string msgError = string.Empty;
+    bool disabled = false;
+    List<GerenciaPermissoes> gerenciaPermissoes = new List<GerenciaPermissoes>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == Guid.Empty ? "Adicionar" : "Atualizar";
+        permissoes = await PermissaoService.ObterTodos();
+
+        IncluiPermissoesNoGerenciaPermissoes();
+    }
+
+    protected void IncluiPermissoesNoGerenciaPermissoes()
+    {
+        foreach (var permissao in permissoes)
+        {
+            gerenciaPermissoes.Add(new GerenciaPermissoes
+                {
+                    Id = permissao.Id,
+                    Relatorio = permissao.Relatorio
+                }
+            );
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != Guid.Empty)
+        {
+            usuario = await UsuarioService.ObterPorId(Id);
+            InicializaGerenciaPermissoesNoFormulario();
+        }
+        else
+        {
+            usuario.Status = EnumStatus.Ativo;
+            usuario.Admin = EnumStatus.Inativo;
+        }
+    }
+
+    protected void InicializaGerenciaPermissoesNoFormulario()
+    {
+        if (usuario.Permissoes != null)
+        {
+            foreach (var permUsu in usuario.Permissoes)
+            {
+                foreach (var inclPerm in gerenciaPermissoes)
+                {
+                    if (permUsu.Id == inclPerm.Id)
+                        inclPerm.Include = true;
+                }
+            }            
+        }
+    }
+
+    protected async Task Enviar()
+    {
+        disabled = true;
+        IncluiPermissoesSelecionadasNoUsuario();
+
+        if (Id != Guid.Empty)
+        {
+            try
+            {
+                await UsuarioService.Atualizar(usuario);
+                NavigationManager.NavigateTo($"usuarios");
+            }
+            catch (Exception ex)
+            {
+                msgError = ex.Message;    
+            }
+        }
+        else
+        {
+            try
+            {
+                await UsuarioService.Adicionar(usuario);
+                NavigationManager.NavigateTo($"usuarios");
+            }
+            catch (Exception ex)
+            {
+                msgError = ex.Message;
+            }
+        }
+
+        disabled = false;
+    }
+
+    protected void Cancelar()
+    {
+        NavigationManager.NavigateTo("usuarios");
+    }
+
+    protected void IncluiPermissoesSelecionadasNoUsuario()
+    {
+        var permList = new List<PermissaoVM>();
+
+        foreach (var inclPerm in gerenciaPermissoes)
+        {
+            if (inclPerm.Include == true)
+            {
+                permList.Add(new PermissaoVM { Id = inclPerm.Id, Relatorio = inclPerm.Relatorio });
+            }
+        }
+
+        usuario.Permissoes = permList;
+    }    
+}

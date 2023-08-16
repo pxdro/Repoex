@@ -1,0 +1,31 @@
+﻿@page "/horasextras"
+@inject IHoraExtraService HoraExtraService
+@attribute [Authorize(Roles = "HoraExtra")]
+
+<PageTitle>Hora Extra</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Hora Extra</h3>
+    @if (horasExtras != null)
+    {
+        <div class="col-auto"><ExportData Classe="HoraExtra" Dados="@horasExtras" /></div>
+    }
+</div>
+
+@if (horasExtras == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <PaginatedTable Classe="HoraExtra" Dados="@horasExtras" LinhasPorPagina="50" />
+}
+
+@code {
+    private List<HoraExtra>? horasExtras;
+
+    protected override async Task OnInitializedAsync()
+    {
+        horasExtras = await HoraExtraService.ObterHorasExtras();
+    }
+}

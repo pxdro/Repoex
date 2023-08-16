@@ -1,0 +1,31 @@
+﻿@page "/cotacoes"
+@inject ICotacaoService CotacaoService
+@attribute [Authorize(Roles = "Cotacao")]
+
+<PageTitle>Cotação</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Cotação</h3>
+    @if (cotacoes != null)
+    {
+        <div class="col-auto"><ExportData Classe="Cotacao" Dados="@cotacoes"/></div>
+    }
+</div>
+
+@if (cotacoes == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <PaginatedTable Classe="Cotacao" Dados="@cotacoes" LinhasPorPagina="50"/> 
+}
+
+@code {
+    private List<Cotacao>? cotacoes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cotacoes = await CotacaoService.ObterCotacoes();
+    }
+}

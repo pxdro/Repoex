@@ -1,0 +1,87 @@
+﻿@page "/permissaoform"
+@page "/permissaoform/{id:guid}"
+@inject IPermissaoService PermissaoService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+
+@if (Id == Guid.Empty)
+{
+    <PageTitle>Criar permissão</PageTitle>
+    <h3>Criar permissão</h3>
+}
+else
+{
+    <PageTitle>Editar permissão</PageTitle>
+    <h3>Editar permissão</h3>
+}
+
+ <EditForm Model="permissao" OnValidSubmit="@Enviar">
+    <DataAnnotationsValidator/>
+
+    <div class="row align-items-lg-center my-2">
+        <div class="form-group col-auto col-md-3">
+            <label for="relatorio">Relatório</label>
+            <InputText id="relatorio" @bind-Value="@permissao.Relatorio" class="form-control"></InputText>
+            <ValidationMessage For="@(() => permissao.Relatorio)"/>
+        </div>
+    </div>
+
+    <div class="justify-content-center col-auto col-md-3">
+        <button disabled="@disabled" type="submit" class="btn btn-primary">Adicionar</button>
+        <button class="btn btn-danger" @onclick="(() => Cancelar())">Cancelar</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(msgError))
+    {
+        <div class="justify-content-center col-auto col-md-6 text-danger mt-3">
+            <span>@msgError</span>
+        </div>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Guid.Empty;
+
+    PermissaoVM permissao = new PermissaoVM();
+    string msgError = string.Empty;
+    bool disabled = false;
+
+    protected async Task Enviar()
+    {
+        disabled = true;
+
+        if (Id != Guid.Empty)
+        {
+            try
+            {
+                await PermissaoService.Atualizar(permissao);
+                NavigationManager.NavigateTo($"permissoes");
+            }
+            catch (Exception ex)
+            {
+                msgError = ex.Message;
+            }
+        }
+        else
+        {
+            try
+            {
+                await PermissaoService.Adicionar(permissao);
+                NavigationManager.NavigateTo($"permissoes");
+            }
+            catch (Exception ex)
+            {
+                msgError = ex.Message;
+            }
+        }
+
+        disabled = false;
+    }
+
+    protected void Cancelar()
+    {
+        NavigationManager.NavigateTo("permissoes");
+    }
+}

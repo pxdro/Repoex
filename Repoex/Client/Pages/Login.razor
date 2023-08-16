@@ -1,0 +1,58 @@
+﻿@page "/login"
+@inject IUsuarioService UsuarioService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+
+<PageTitle>Login</PageTitle>
+<h3>Login</h3>
+
+<EditForm Model="usuario" OnSubmit="Enviar" class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group col-auto">
+                <label for="login">Usuário</label>
+                <InputText id="login" @bind-Value="usuario.Login" class="form-control"/>
+            </div>
+            <div class="form-group mt-2">
+                <label for="senha">Senha</label>
+                <InputText id="senha" @bind-Value="usuario.Senha" class="form-control" type="password"/>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary" disabled="@Disabled">Entrar</button>
+            </div>
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(MensagemErro))
+    {
+        <p class="text-danger mt-2">@MensagemErro</p>
+    }
+</EditForm>
+
+
+@code {
+    UsuarioDto usuario = new UsuarioDto();
+    bool Disabled = false;
+    string MensagemErro = string.Empty;
+
+    async Task Enviar()
+    {
+        Disabled = true;
+        MensagemErro = string.Empty;
+
+        try
+        {
+            var resultado = await UsuarioService.Login(usuario);
+            await LocalStorage.SetItemAsync("token", resultado.Jwt);
+            await LocalStorage.SetItemAsync("usuario", resultado.Nome);
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            MensagemErro = ex.Message;
+        }
+
+        Disabled = false;
+    }
+}

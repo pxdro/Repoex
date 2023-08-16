@@ -1,0 +1,28 @@
+﻿@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+<AuthorizeView>
+    <Authorized>
+        <span class="my-auto pe-1" style="color: white;">Olá, @context.User.Identity!.Name</span>
+        <button @onclick="Sair" class="btn btn-danger">Logout</button>
+    </Authorized>
+    <NotAuthorized>
+        <button @onclick="Entrar" class="btn btn-success">Login</button>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {    
+    void Entrar()
+    {
+        NavigationManager.NavigateTo("login");
+    }
+
+    async Task Sair()
+    {
+        await LocalStorage.RemoveItemAsync("token");
+        await LocalStorage.RemoveItemAsync("usuario");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        NavigationManager.NavigateTo("/");
+    }
+}

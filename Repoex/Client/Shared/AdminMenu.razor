@@ -1,0 +1,42 @@
+﻿<AuthorizeView Roles="Admin">
+
+    <h5>Administração</h5>
+
+    <nav class="nav">  
+        <NavLink class="nav-link m-2 p-0" href="usuarios">
+             <button class="btn btn-primary" href="usuarios">
+                <div>
+                    <span class="oi oi-people"></span>
+                </div>
+                <div>
+                   <span class="texto">Usuários</span> 
+                </div>
+            </button>
+        </NavLink>
+
+         <NavLink class="nav-link m-2 p-0" href="permissoes">
+             <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-check"></span>
+                </div>
+                <div>
+                   <span class="texto">Permissões</span> 
+                </div>
+            </button>
+        </NavLink>
+
+         <NavLink class="nav-link m-2 p-0" href="sandbox">
+             <button class="btn btn-primary">
+                <div>
+                    <span class="oi oi-brush"></span>
+                </div>
+                <div>
+                    <span class="texto">Sandbox</span> 
+                </div>
+            </button>
+        </NavLink>
+    </nav>
+</AuthorizeView>
+
+@code {
+}

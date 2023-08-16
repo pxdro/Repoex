@@ -1,0 +1,31 @@
+﻿@page "/decolideias"
+@inject IDecolideiaService DecolideiaService
+@attribute [Authorize(Roles = "Decolideia")]
+
+<PageTitle>Decolideia</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Decolideia</h3>
+    @if (decolideias != null)
+    {
+        <div class="col-auto"><ExportData Classe="Decolideia" Dados="@decolideias" /></div>
+    }
+</div>
+
+@if (decolideias == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <PaginatedTable Classe="Decolideia" Dados="@decolideias" LinhasPorPagina="10" />
+}
+
+@code {
+    private List<Decolideia>? decolideias;
+
+    protected override async Task OnInitializedAsync()
+    {
+        decolideias = await DecolideiaService.ObterIdeias();
+    }
+}

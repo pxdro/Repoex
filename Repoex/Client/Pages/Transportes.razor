@@ -1,0 +1,33 @@
+﻿@page "/transportes"
+@inject ITransporteService TransporteService
+@attribute [Authorize(Roles = "Transporte")]
+
+<PageTitle>Transportes</PageTitle>
+
+<div class="row">
+    <h3 class="col-auto me-auto">Transportes</h3>
+    <!--
+    @if (transportes != null)
+    {
+        <div class="col-auto"><ExportData Classe="Transporte" Dados="@transportes"/></div>
+    }
+    -->
+</div>
+
+@if (transportes == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <PaginatedTable Classe="Transporte" Dados="@transportes" LinhasPorPagina="20"/>    
+}
+
+@code {
+    private List<Transporte>? transportes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        transportes = await TransporteService.ObterTransportes();
+    }
+}

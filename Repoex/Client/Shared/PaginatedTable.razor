@@ -1,0 +1,139 @@
+﻿@typeparam Classe
+
+<div class="mb-3">
+    <label>
+        Filtrar por:
+        <input type="text" @bind-value=@Filtro/>
+    </label>
+    <button class="btn btn-success" @onclick="FiltrarTabela" disabled="@string.IsNullOrWhiteSpace(Filtro)">Filtrar</button>
+    <button class="btn btn-danger" @onclick="() => IrParaPagina(1)" disabled=@ResetarDesativado>Resetar</button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                @foreach (var propriedade in typeof(Classe).GetProperties())
+                {
+                    <th>@propriedade.Name</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dado in DadosVisiveis)
+            {
+                <tr>
+                @foreach (var propriedade in typeof(Classe).GetProperties())
+                {
+                    <td>@propriedade.GetValue(dado)</td>
+                }
+                </tr>
+            }
+        </tbody>
+    </table>  
+</div>
+
+@if (NumeroDePaginas > 1)
+{
+    <div style="overflow-x: auto" class="table-responsive">
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(PaginaAtual == 1 ? "disabled" : "")">
+                    <button class="btn page-link" disabled="@(PaginaAtual == 1)" @onclick="() => IrParaPagina(1)">Primeira</button>
+                </li>
+
+                <li class="page-item @(PaginaAtual == 1 ? "disabled" : "")">
+                    <button class="btn page-link" disabled="@(PaginaAtual == 1)" @onclick="() => IrParaPagina(PaginaAtual - 1)">Anterior</button>
+                </li>
+
+                @for (int i = 1; i <= NumeroDePaginas; i++)
+                {
+                    int pageNumber = i;
+                    <li class="page-item @(PaginaAtual == pageNumber ? "active" : "")">
+                        <button class="btn page-link" disabled="@(PaginaAtual == pageNumber)" @onclick="() => IrParaPagina(pageNumber)">
+                            @pageNumber
+                        </button>
+                    </li>
+                }
+
+                <li class="page-item @(PaginaAtual == NumeroDePaginas ? "disabled" : "")">
+                    <button class="btn page-link" disabled="@(PaginaAtual == NumeroDePaginas)" @onclick="() => IrParaPagina(PaginaAtual + 1)">
+                        Próxima
+                    </button>
+                </li>
+
+                <li class="page-item @(PaginaAtual == NumeroDePaginas ? "disabled" : "")">
+                        <button class="btn page-link" disabled="@(PaginaAtual == NumeroDePaginas)" @onclick="() => IrParaPagina(NumeroDePaginas)">
+                        Última
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<Classe> Dados { get; set; } = new List<Classe>();
+
+    [Parameter]
+    public int LinhasPorPagina { get; set; }
+
+    private List<Classe> DadosVisiveis = new List<Classe>();
+    private int PaginaAtual = 1;
+    private int NumeroDePaginas => (int)Math.Ceiling((double)Dados.Count / LinhasPorPagina);
+    private bool EhPrimeiraPagina => PaginaAtual == 1;
+    private bool EhUltimaPagina => PaginaAtual == NumeroDePaginas;
+    private string Filtro = string.Empty;
+
+    private bool ResetarDesativado = true;
+
+    protected override void OnInitialized()
+    {
+        AtualizaLinhasVisiveis();
+    }
+
+    private void AtualizaLinhasVisiveis()
+    {
+        DadosVisiveis = Dados.Skip((PaginaAtual - 1) * LinhasPorPagina).Take(LinhasPorPagina).ToList();
+    }
+
+    private void IrParaPagina(int pageNumber)
+    {
+        Filtro = string.Empty;
+        ResetarDesativado = true;
+
+        PaginaAtual = pageNumber;
+        AtualizaLinhasVisiveis();
+    }
+
+    private void PaginaPosterior()
+    {
+        if (!EhUltimaPagina)
+        {
+            PaginaAtual++;
+            AtualizaLinhasVisiveis();
+        }
+    }
+
+    private void PaginaAnterior()
+    {
+        if (!EhPrimeiraPagina)
+        {
+            PaginaAtual--;
+            AtualizaLinhasVisiveis();
+        }
+    }
+
+    private void FiltrarTabela()
+    { 
+        PaginaAtual = NumeroDePaginas + 1;
+        ResetarDesativado = false;
+
+        DadosVisiveis = Dados.Where(item =>
+            string.IsNullOrEmpty(Filtro) ||
+            typeof(Classe).GetProperties()
+                .Any(prop =>
+                    prop.GetValue(item)?.ToString()?.Contains(Filtro, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+    }
+}
